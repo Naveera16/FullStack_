@@ -4,22 +4,28 @@ const app = express()
 // -----------env
 require("dotenv").config()
 
+//------CORS
+const cors = require("cors")
 
-//---------MIDDLEWEARAS
+//---------MIDDLEWARES
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
-
-
+app.use(cors())
+const {ImageUpload} = require("./Middlewares/ImageUpload");
+const upload = ImageUpload();
 //---DATABASE
 const {connectionDB} = require("./Config/Database")
 
-// --User Role API {GET, POST}
-const {getUser,createUser} = require("./Controllers/UserDataController")
+// --User Role API {GET, POST ,  DELETE ,PUT}
+const {getUser,createUser , deleteUser , updateUser} = require("./Controllers/UserDataController")
 
 
 //---app route
-//-------UserData
-app.route("/").get(getUser).post(createUser)
+//-------UserData (API : "http://localhost:5000/")
+app.route("/").get(getUser).post(upload.single('userImage'),createUser)
+//---app route
+//-------UserData (API : "http://localhost:5000/:id")
+app.route("/:id").delete(deleteUser).put(updateUser)
 
 
 ///---Roles API (GET,POST)
