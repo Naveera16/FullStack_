@@ -10,10 +10,14 @@ async function createUser(req, res) {
         userName,
         userEmail,
         userPassword,
-        userRole
+        userRole,
+        // userImage
     } = req.body
-    const UserImage = req.file
-    const User_Image = UserImage.path;
+    const userImage = req.file
+    console.log(userImage)
+    // return res.send({"data" : userImage})
+    const User_Image = userImage.path;
+    const fileID = userImage.filename;
     const checkData = await userData.find({ userEmail: userEmail })
     if (checkData.length > 0) return res.send({ "error": "Email already Exists" })
     const namePattern = /^[A-Za-z]{3,}$/;  // only alphabets more then 3 letter
@@ -28,6 +32,7 @@ async function createUser(req, res) {
                     userName: userName,
                     userEmail: userEmail,
                     userImage: User_Image,
+                    userImageID :fileID,
                     userPassword: PasswordHash,
                     userRole: userRole
                 })
@@ -61,9 +66,11 @@ async function getUser(req, res) {
 //Description : Delete User Functionlity
 async function deleteUser(req, res) {
     const ID = req.params.id
+    const { public_id } = req.body;
     const UserData = await userData.find({ _id: ID })
     if (UserData <= 0) return res.status(404).send({ "error": "User not found!" })
     try {
+
         const deleteData = await userData.deleteOne({
             _id: ID
         })
@@ -84,9 +91,17 @@ async function updateUser(req, res) {
     if (oldData <= 0) return res.status(404).send({ "error": "User not found!" })
     const { userName,
         userEmail,
-        userImage,
+        // userImage,
         userPassword,
         userRole } = req.body
+        const userImage = req.file;
+        // let User_Image;
+        // if (userImage) {
+        //   User_Image = userImage.path; // Store the file path from the uploaded image
+        // }
+        // console.log(userImage)
+        const User_Image = userImage.path;
+    const fileID = userImage.filename;
     const namePattern = /^[A-Za-z]{3,}$/;  // only alphabets more then 3 letter
     const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|hotmail\.com)$/; // Only gmail, yahoo, hotmail
     const PasswordHash = await bcrypt.hash(userPassword, 10) //----Password Hash
@@ -101,7 +116,8 @@ async function updateUser(req, res) {
                         $set: {
                             userName,
                             userEmail,
-                            userImage,
+                            userImage: User_Image,
+                            userImageID :fileID,
                             userPassword: PasswordHash,
                             userRole
                         }

@@ -36,10 +36,13 @@ const [Roles,setRoles] = useState([])
         fetchingData()
     })
 // -------Delete functionality
-    const DeleteUser = async (ID)=>{
+    const DeleteUser = async (ID,imageID)=>{
 try {
+    const formData = new FormData();
+    formData.append('imageID', imageID);
     const Response =await fetch(`http://localhost:5000/${ID}`,{
-        method : "DELETE"
+        method : "DELETE",
+        body: formData
     })
     if (Response.status === 201) {
         alert("User deleted")
@@ -69,33 +72,39 @@ const updateModal = (ID,name,email,role,password,image) =>{
     setUserEmail(email)
     setUserRole(role)
     // setUserPassword(password)
-    setUserImage(image)
     const modalInstance = new Modal(modalRef.current);
         modalInstance.show();
 }
- 
-
+const [IMG,setIMG] = useState("")
+const handleImageChange = (e) => {
+    setIMG(URL.createObjectURL(e.target.files[0]));
+    setUserImage(e.target.files[0]);
+  };
 const HandleSubmit =async (e) => {
     e.preventDefault()
     if (UserName == "" || UserEmail == "" || UserRole == "none" || UserPassword == "" || UserImage == "") {
         alert("Fill the form first!")
     }
     else {
-        const updateData ={
-            userName : UserName,
-            userEmail : UserEmail,
-            userImage : UserImage,
-            userPassword : UserPassword,
-            userRole : UserRole
-        }
+        // const updateData ={
+        //     userName : UserName,
+        //     userEmail : UserEmail,
+        //     userImage : UserImage,
+        //     userPassword : UserPassword,
+        //     userRole : UserRole
+        // }
+        const updateData = new FormData();
+        updateData.append('userName', UserName);
+        updateData.append('userEmail', UserEmail);
+        updateData.append('userPassword', UserPassword);
+        updateData.append('userRole', UserRole);
+        updateData.append('userImage', UserImage);
+        updateData.append('oldImage', UserImage);
 try {
     setUserPassword('')
      const Response = await fetch(`http://localhost:5000/${UserID}`,{
             method: "PUT",
-            headers: {
-                'Content-Type': "application/json"
-              },
-              body: JSON.stringify(updateData)
+              body: updateData
         })
         const modalInstance =  Modal.getInstance(modalRef.current);
         modalInstance.hide(); 
@@ -104,11 +113,11 @@ try {
           }
           else {
             const checkerror = await Response.json() //-----Response.status===500
-            alert(checkerror.error)
+            console.log(checkerror.error)
           }
 } catch (error) {
     setUserPassword('')
-    alert(error)
+    console.log(error)
 }
        
          
@@ -142,13 +151,15 @@ try {
                                         <td>{data.userName}</td>
                                         <td>{data.userEmail}</td>
                                         <td>{data.userRole}</td>
-                                        <td>{data.userImage}</td>
                                         <td>
-                                            <button onClick={()=>updateModal(data._id,data.userName,data.userEmail,data.userRole,data.userPassword,data.userImage)} className='btn btn-primary btn-sm'>
+                                            <img src={data.userImage} style={{maxWidth : "100px" }} alt="" className=' img-thumbnail ' />
+                                        </td>
+                                        <td>
+                                            <button onClick={()=>updateModal(data._id,data.userName,data.userEmail,data.userRole,data.userPassword)} className='btn btn-primary btn-sm'>
                                                 
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </button>
-                                            <button onClick={()=>DeleteUser(data._id)} className='btn btn-danger btn-sm ms-2'>
+                                            <button onClick={()=>DeleteUser(data._id,data.userImageID)} className='btn btn-danger btn-sm ms-2'>
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </td>
@@ -159,11 +170,17 @@ try {
 
                     </tbody>
                 </table>
+                {
+                    UserList.length <=0
+                    ?
+                    <h1 className='text-center mt-5'> No Data Found</h1>
+                    :null
+                }
             </div>
              {/* Update Modal */}
              <div id='modal_' class="modal fade" ref={modalRef} tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
-                    <form className='w-75' onSubmit={HandleSubmit}>
+                    <form method='post' enctype="multipart/form-data" className='w-100' onSubmit={HandleSubmit}>
                         <div class="modal-content">
                             <div class="modal-header px-4">
                                 <h4 class="modal-title text-center">Update Role</h4>
@@ -178,10 +195,25 @@ try {
                         <label htmlFor="exampleInputEmail1" className="form-label">Email address</label>
                         <input value={UserEmail} onChange={(e) => setUserEmail(e.target.value)} type="email" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" />
                     </div>
-                    <div className="mb-3 mt-2">
+                    <div className="row mb-3 mt-2">
+                    <div className=" col-9">
                         <label htmlFor="exampleInputEmail1" className="form-label">Image</label>
-                        <input value={UserImage} onChange={(e) => setUserImage(e.target.value)} type="text" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" />
+                        <input name='userImage' onChange={(e) => handleImageChange(e)} type="file" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" />
                     </div>
+                    <div className="col-3 ">
+                    {
+                                IMG == "" ?
+                                    <div style={{
+                                        backgroundColor: "#98939378", width: "100px", height: "100px", color: "grey",
+                                        fontSize: "13px"
+                                    }} className='px-3 py-4 text-center'>
+                                        No Image selected
+                                    </div>
+
+                                    :
+                                    <img style={{ maxWidth: "100px" }} alt="" className=' img-thumbnail ' src={IMG} />
+                            }
+                    </div></div>
                     <div className="mb-3 mt-2">
                         <label htmlFor="exampleInputEmail1" className="form-label">Role</label>
                         <select value={UserRole} onChange={(e) => setUserRole(e.target.value)} name="" id="" className="form-select">
@@ -202,7 +234,7 @@ try {
 
                             </div>
                             <div class="modal-footer">
-                                <button type="submit" data-bs-dismiss="modal" aria-label="Close" className="btn btn-primary">Add Roles</button>
+                                <button type="submit" data-bs-dismiss="modal" aria-label="Close" className="btn btn-primary">Update</button>
                             </div>
                         </div>
                     </form>
