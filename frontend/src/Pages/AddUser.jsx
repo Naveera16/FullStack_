@@ -29,7 +29,7 @@ const AddUser = () => {
     const [UserImage, setUserImage] = useState("")
     const [IMG, setIMG] = useState("")
     const handleImageChange = (e) => {
-        setIMG(URL.createObjectURL(e.target.files[0]));
+        setIMG(URL.createObjectURL(e.target.files[0])); //----to show Image
         setUserImage(e.target.files[0]);
     };
 
@@ -37,43 +37,33 @@ const AddUser = () => {
     const HandleSubmit = async (e) => {
         e.preventDefault()
 
-        // console.log(UserImage)
         if (UserName == "" || UserEmail == "" || UserRole == "none" || UserPassword == "" || UserImage == "") {
             alert("Fill the form first!")
         }
-        else {
+        else { 
+            //-------Data 
             const formData = new FormData();
             formData.append('userName', UserName);
             formData.append('userEmail', UserEmail);
             formData.append('userPassword', UserPassword);
             formData.append('userRole', UserRole);
             formData.append('userImage', UserImage);
-            // const newUser ={
-            //     userName : UserName,
-            //     userEmail : UserEmail,
-            //     userImage : UserImage,
-            //     userPassword : UserPassword,
-            //     userRole : UserRole
-            // }
+    
             try {
                 const Response = await fetch("http://localhost:5000/", {
                     method: "POST",
-                    // headers: {
-                    //     'Content-Type': "application/json"
-                    //   },
                     body: formData
                 })
-                const ch = await Response.json()
-                console.log(ch)
+                const check = await Response.json()
+                console.log(check)
                 if (Response.status === 201) { //-------Respone.status ===201
-                    // toast.success("Role Added")
                     alert("User Added")
                     setTimeout(() => {
                         navigate('/');
                     }, 1000);
                 }
                 else {
-                    alert(ch.error)
+                    alert(check.error)
                 }
             } catch (error) {
                 alert(error)

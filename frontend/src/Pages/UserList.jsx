@@ -44,12 +44,9 @@ const UserList = () => {
         );
         if (isConfirmed) {
             try {
-                // const formData = new FormData();
-                // formData.append('imageID', imageID);
-                const Data= {
-                    OLDimageID:imageID
-                  
-                  }
+                const Data = {
+                    OLDimageID: imageID
+                }
                 const Response = await fetch(`http://localhost:5000/${ID}`, {
                     method: "DELETE",
                     headers: {
@@ -63,8 +60,6 @@ const UserList = () => {
                 } else {
                     const checkerror = await Response.json() //-----Response.status===500
                     alert(`Error ${Response.status} : ${checkerror.error} `)
-
-                    // toast.error(`Error :${Response.status} ${checkerror.error}`);
                 }
             } catch (error) {
                 console.log({ "Error": error })
@@ -84,8 +79,8 @@ const UserList = () => {
     const [Imagefilename, setImagefilename] = useState("")
     //---MODAL
     const modalRef = useRef(null);
-    const [IMG, setIMG] = useState("")
-    const updateModal = (ID, name, email, role, password, image,oldfilename) => {
+    const [IMG, setIMG] = useState("") // ------ to show image
+    const updateModal = (ID, name, email, role, image, oldfilename) => {
         setUserID(ID)
         setUserName(name)
         setUserEmail(email)
@@ -93,7 +88,6 @@ const UserList = () => {
         setIMG(image)
         setOldImage(image)
         setImagefilename(oldfilename)
-        // setUserPassword(password)
         const modalInstance = new Modal(modalRef.current);
         modalInstance.show();
     }
@@ -134,7 +128,7 @@ const UserList = () => {
                     }
                     else {
                         const checkerror = await Response.json() //-----Response.status===500
-                        console.log(checkerror.error)
+                        alert(checkerror.error)
                     }
                 } catch (error) {
                     setUserPassword('')
@@ -162,7 +156,7 @@ const UserList = () => {
                     }
                     else {
                         const checkerror = await Response.json() //-----Response.status===500
-                        console.log(checkerror.error)
+                        alert(checkerror.error)
                     }
                 } catch (error) {
                     setUserPassword('')
@@ -207,7 +201,7 @@ const UserList = () => {
                                             <img src={data.userImage} style={{ maxWidth: "100px" }} alt="" className=' img-thumbnail ' />
                                         </td>
                                         <td>
-                                            <button onClick={() => updateModal(data._id, data.userName, data.userEmail, data.userRole, data.userPassword, data.userImage,data.userImageID)} className='btn btn-primary btn-sm'>
+                                            <button onClick={() => updateModal(data._id, data.userName, data.userEmail, data.userRole, data.userImage, data.userImageID)} className='btn btn-primary btn-sm'>
 
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </button>

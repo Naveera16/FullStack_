@@ -6,7 +6,6 @@ const cloudinary = require('cloudinary').v2;
 
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// STEP - 02 - Setup API KEYS REFERENCES - 
 
 cloudinary.config({
     cloud_name:process.env.CLOUD_NAME,
@@ -14,15 +13,13 @@ cloudinary.config({
     api_secret:process.env.CLOUD_API_SECRET_KEY
 });
 function ImageUpload(){
-// STEP - 03  Multer storage configuration for Cloudinary
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-      folder: 'Practicals', // Folder name in Cloudinary
+      folder: 'Practicals', 
       allowed_formats: ['jpg', 'png'],
     },
   });
-// STEP - 04
 
   const upload = multer({ storage });
 
@@ -32,13 +29,13 @@ const storage = new CloudinaryStorage({
 
 async function ImageDelete(req, res, next) {
   try {
-    const { OLDimageID } = req.body; // Corrected this line
+    const { OLDimageID } = req.body; 
     console.log("Extracted imageID:", OLDimageID);
     if (!OLDimageID) {
       return res.status(400).json({ error: "Image ID is required." });
     }
     await cloudinary.uploader.destroy(OLDimageID);
-    next(); // Move to the next middleware (deleteUser)
+    next(); 
   } catch (error) {
     console.error("Error deleting image:", error);
     res.status(500).json({ error: "Failed to delete image from Cloudinary." });

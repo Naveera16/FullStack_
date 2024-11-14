@@ -19,15 +19,12 @@ async function createUser(req, res) {
     } = req.body
     const userImage = req.file
     console.log(userImage)
-    // return res.send({"data" : userImage})
     const User_Image = userImage.path;
     const fileID = userImage.filename;
     const checkData = await userData.find({ userEmail: userEmail })
     if (checkData.length > 0) return res.send({ "error": "Email already Exists" })
     const namePattern = /^[A-Za-z]{3,}$/;  // only alphabets more then 3 letter
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|hotmail\.com)$/; // Only gmail, yahoo, hotmail
-    //   const imagePattern = /^(http|https):\/\/[^\s]+(\.jpg|\.jpeg|\.png|\.gif)$/; // URL pattern for images 
-    //   const rolePattern = /^[A-Za-z]+$/;   
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|hotmail\.com)$/; // Only gmail, yahoo, hotmail;   
     if (namePattern.test(userName)) {
         if (emailPattern.test(userEmail)) {
             const PasswordHash = await bcrypt.hash(userPassword, 10) //----Password Hash
@@ -103,7 +100,7 @@ async function updateUser(req, res) {
     let fileID;
     if (userImage) {
         User_Image = userImage.path;
-        fileID = userImage.filename;// Store the file path from the uploaded image
+        fileID = userImage.filename;
         await cloudinary.uploader.destroy(Imagefilename);
     }
     else {
@@ -133,7 +130,7 @@ async function updateUser(req, res) {
                         }
                     }
                 )
-                
+
                 return res.status(201).send({ "data": "User Data Updated" })
             } catch (error) {
                 //-----might be Validation Error 
@@ -141,11 +138,11 @@ async function updateUser(req, res) {
             }
         }
         else {
-            return res.status(500).send("Only gmail, yahoo, hotmail  accepted")
+            return res.status(403).send({ "error": "Only gmail, yahoo, hotmail  accepted" })
         }
     }
     else {
-        return res.status(500).send("Name should contain only Alphabets, length should be more than 3 letters ")
+        return res.status(403).send({ "error": "Name should contain only Alphabets, length should be more than 3 letters " })
     }
 }
 
