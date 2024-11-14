@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-
+import {  useNavigate } from 'react-router-dom';
 const AddUser = () => {
-
+    const navigate = useNavigate()
     //-------Roles
     const [Roles, setRoles] = useState([])
     useEffect(() => {
@@ -68,6 +68,9 @@ const AddUser = () => {
                 if (Response.status === 201) { //-------Respone.status ===201
                     // toast.success("Role Added")
                     alert("User Added")
+                    setTimeout(() => {
+                        navigate('/');
+                    }, 1000);
                 }
                 else {
                     alert(ch)
@@ -118,7 +121,7 @@ const AddUser = () => {
                     <div className="mb-3 mt-2">
                         <label htmlFor="exampleInputEmail1" className="form-label">Role</label>
                         <select onChange={(e) => setUserRole(e.target.value)} name="" id="" className="form-select">
-                            <option value="none">Select Role</option>
+                            <option selected value="none">Select Role</option>
                             {
                                 Roles.map((data, index) => {
                                     return (

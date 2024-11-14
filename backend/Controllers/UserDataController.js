@@ -1,7 +1,11 @@
 const bcrypt = require("bcrypt")
 const { userData } = require("../Models/UserData")
-
-
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET_KEY
+});
 //-------------Method : POST
 //---------------API : "http://localhost:5000/"
 //Description : Create User Functionlity
@@ -32,7 +36,7 @@ async function createUser(req, res) {
                     userName: userName,
                     userEmail: userEmail,
                     userImage: User_Image,
-                    userImageID :fileID,
+                    userImageID: fileID,
                     userPassword: PasswordHash,
                     userRole: userRole
                 })
@@ -45,11 +49,11 @@ async function createUser(req, res) {
 
         }
         else {
-            return res.status(403).send({"error" : "Only gmail, yahoo, hotmail  accepted"})
+            return res.status(403).send({ "error": "Only gmail, yahoo, hotmail  accepted" })
         }
     }
     else {
-        return res.status(403).send({"error" : "Name should contain only Alphabets, length should be more than 3 letters "})
+        return res.status(403).send({ "error": "Name should contain only Alphabets, length should be more than 3 letters " })
     }
 
 }
@@ -66,7 +70,6 @@ async function getUser(req, res) {
 //Description : Delete User Functionlity
 async function deleteUser(req, res) {
     const ID = req.params.id
-    const { public_id } = req.body;
     const UserData = await userData.find({ _id: ID })
     if (UserData <= 0) return res.status(404).send({ "error": "User not found!" })
     try {
@@ -91,17 +94,24 @@ async function updateUser(req, res) {
     if (oldData <= 0) return res.status(404).send({ "error": "User not found!" })
     const { userName,
         userEmail,
-        // userImage,
+        Imagefilename,
+        useroldImage,
         userPassword,
         userRole } = req.body
-        const userImage = req.file;
-        // let User_Image;
-        // if (userImage) {
-        //   User_Image = userImage.path; // Store the file path from the uploaded image
-        // }
-        // console.log(userImage)
-        const User_Image = userImage.path;
-    const fileID = userImage.filename;
+    const userImage = req.file;
+    let User_Image;
+    let fileID;
+    if (userImage) {
+        User_Image = userImage.path;
+        fileID = userImage.filename;// Store the file path from the uploaded image
+        await cloudinary.uploader.destroy(Imagefilename);
+    }
+    else {
+        User_Image = useroldImage;
+        fileID = Imagefilename
+    }
+
+
     const namePattern = /^[A-Za-z]{3,}$/;  // only alphabets more then 3 letter
     const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|hotmail\.com)$/; // Only gmail, yahoo, hotmail
     const PasswordHash = await bcrypt.hash(userPassword, 10) //----Password Hash
@@ -117,12 +127,13 @@ async function updateUser(req, res) {
                             userName,
                             userEmail,
                             userImage: User_Image,
-                            userImageID :fileID,
+                            userImageID: fileID,
                             userPassword: PasswordHash,
                             userRole
                         }
                     }
                 )
+                
                 return res.status(201).send({ "data": "User Data Updated" })
             } catch (error) {
                 //-----might be Validation Error 

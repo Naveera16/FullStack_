@@ -22,8 +22,6 @@ const storage = new CloudinaryStorage({
       allowed_formats: ['jpg', 'png'],
     },
   });
-
-
 // STEP - 04
 
   const upload = multer({ storage });
@@ -32,18 +30,21 @@ const storage = new CloudinaryStorage({
 }
 
 
-async function ImageDelete(req, res) {
+async function ImageDelete(req, res, next) {
   try {
-    const { imageID } = req.body.imageID; // assuming imageID is sent in the request body
-    if (!imageID) {
+    const { OLDimageID } = req.body; // Corrected this line
+    console.log("Extracted imageID:", OLDimageID);
+    if (!OLDimageID) {
       return res.status(400).json({ error: "Image ID is required." });
     }
-    await cloudinary.uploader.destroy(imageID);
+    await cloudinary.uploader.destroy(OLDimageID);
+    next(); // Move to the next middleware (deleteUser)
   } catch (error) {
     console.error("Error deleting image:", error);
     res.status(500).json({ error: "Failed to delete image from Cloudinary." });
   }
 }
+
 
 
 module.exports ={ImageUpload ,ImageDelete }
