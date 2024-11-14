@@ -73,7 +73,7 @@ const AddUser = () => {
                     }, 1000);
                 }
                 else {
-                    alert(ch)
+                    alert(ch.error)
                 }
             } catch (error) {
                 alert(error)
